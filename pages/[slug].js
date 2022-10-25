@@ -6,39 +6,39 @@ import {toast} from "react-toastify";
 import {arrayUnion, doc, getDoc, onSnapshot, Timestamp, updateDoc} from "firebase/firestore";
 import Image from "next/image";
 
-const Details = () => {
+const PostDetails = () => {
   const route = useRouter();
   const routeData = route.query;
-  const [message, setMessage] = useState("");
-  const [allMessages, setAllMessages] = useState([]);
+  const [comment, setComment] = useState("");
+  const [allComments, setAllComments] = useState([]);
 
-  // Submit a message
-  const submitMessage = async () => {
+  // Submit a Comment
+  const submitComment = async () => {
     // Check if the user is logged in
     if (!auth.currentUser) return route.push("/auth/login");
 
-    if (!message) {
+    if (!comment) {
       toast.error("Don't leave an empty message 😁");
     }
 
     const docRef = doc(db, "posts", routeData.id);
     await updateDoc(docRef, {
       comments: arrayUnion({
-        message,
-        avatar: auth.currentUser.photoURL,
-        userName: auth.currentUser.displayName,
+        comment,
+        avatar: auth.currentUser.photoURL || "/hacker.png",
+        userName: auth.currentUser.displayName || "anonymous",
         time: Timestamp.now()
       })
     });
 
-    setMessage("");
+    setComment("");
   };
 
   // Get Comments
   const getComments = async () => {
     const docRef = doc(db, "posts", routeData.id);
     const unsubscribe = onSnapshot(docRef, snapshot => {
-      setAllMessages(snapshot.data().comments);
+      setAllComments(snapshot.data().comments);
     });
     return unsubscribe;
   };
@@ -54,14 +54,14 @@ const Details = () => {
       <div className="my-4">
         <div className="flex">
           <input
-            onChange={e => setMessage(e.target.value)}
+            onChange={e => setComment(e.target.value)}
             type="text"
-            value={message}
-            placeholder="Send a message"
+            value={comment}
+            placeholder="Send a comment"
             className="bg-gray-700 w-full p-2 text-white text-sm"
           />
           <button
-            onClick={submitMessage}
+            onClick={submitComment}
             className="bg-cyan-500 text-white py-2 px-4 text-sm"
           >
             Submit</button>
@@ -69,19 +69,19 @@ const Details = () => {
 
         <div className="py-6">
           <h2 className="font-bold">Comments</h2>
-          {allMessages?.map((message, i) => (
+          {allComments?.map((comm, i) => (
             <div key={i}>
               <div>
                 <Image
-                  src={message.avatar}
-                  alt={message.displayName}
+                  src={comm.avatar || "/hacker.png"}
+                  alt={comm.displayName || "anonymous"}
                   width={48}
                   height={48}
                   className="rounded-full cursor-pointer"
                 />
-                <h2>{message.userName}</h2>
+                <h2>{comm.userName || "anonymous"}</h2>
               </div>
-              <p>{message.message}</p>
+              <p>{comm.comment}</p>
             </div>
           ))}
         </div>
@@ -90,4 +90,4 @@ const Details = () => {
   );
 };
 
-export default Details;
+export default PostDetails;

@@ -16,8 +16,10 @@ const Nav = () => {
       </Link>
 
       {!user && (
-        <Link href={"/auth/login"}>
-          <a className="app__buttons ml-8">Sign In</a>
+        <Link href={"/auth/signin"}>
+          <a className="app__buttons bg-white text-cyan-500 border-cyan-500">
+            Sign In
+          </a>
         </Link>
       )}
 
@@ -34,7 +36,7 @@ const Nav = () => {
           </button>
           <Link href="/dashboard">
             <Image
-              src={user.photoURL}
+              src={user.photoURL || "/hacker.png"}
               width={40}
               height={40}
               alt={`${user.displayName}'s profile picture`}

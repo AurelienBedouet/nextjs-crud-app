@@ -49,8 +49,8 @@ const Post = () => {
         ...post,
         timestamp: serverTimestamp(),
         user: user.uid,
-        avatar: user.photoURL,
-        username: user.displayName,
+        avatar: user.photoURL || "/hacker.png",
+        username: user.displayName || "anonymous",
       });
       setPost({ description: "" });
       toast.success("Post successfully published! 🚀 ");
@@ -84,6 +84,12 @@ const Post = () => {
         <h1 className="text-2xl font-bold">
           {post.hasOwnProperty("id") ? "Edit your Post" : "Create a new Post"}
         </h1>
+
+        {/* Post Title */}
+        {/* <div className="py-2">
+          <input type="text" />
+        </div> */}
+        {/* Post Content */}
         <div className="py-2">
           <h3 className="text-lg font-medium py-2">Description</h3>
           <textarea

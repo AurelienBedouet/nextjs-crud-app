@@ -6,13 +6,13 @@ const Message = ({ children, avatar, username, description }) => {
     <div className="bg-white p-8 border-b-2 rounded-lg">
       <div className="flex items-center gap-4">
         <Image
-          src={avatar}
-          alt={`${username}'s profile picture`}
+          src={avatar || "/hacker.png"}
+          alt={username ? username : "anonymous"}
           width={48}
           height={48}
           className="rounded-full"
         />
-        <h2>{username}</h2>
+        <h2>{username ? username : "anonymous"}</h2>
       </div>
       <div className="pt-4">
         <p>{description}</p>
