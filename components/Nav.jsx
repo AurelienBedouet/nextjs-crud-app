@@ -3,9 +3,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { auth } from "../utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/router";
 
 const Nav = () => {
+  const router = useRouter();
   const [user, loading] = useAuthState(auth);
+
+  const SignOut = () => {
+    auth.signOut();
+    toast.success("Successfully logged out!");
+    router.push("/");
+  };
 
   return (
     <nav className="flex justify-between items-center py-6">
@@ -30,7 +40,7 @@ const Nav = () => {
           </Link>
           <button
             className="app__buttons bg-white text-cyan-500 border-cyan-500"
-            onClick={() => auth.signOut()}
+            onClick={SignOut}
           >
             Sign Out
           </button>

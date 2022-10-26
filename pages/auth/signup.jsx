@@ -74,7 +74,7 @@ const Signup = () => {
       <div className="flex gap-4 items-center">
         <p className="my-4 font-light">Already have an account ?</p>
         <Link href="/auth/signin">
-          <a className="text-gray-700 font-medium">Sign Up</a>
+          <a className="text-gray-700 font-medium">Sign In</a>
         </Link>
       </div>
     </div>
