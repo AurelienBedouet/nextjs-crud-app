@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 
-const Message = ({ children, avatar, username, description }) => {
+const Message = ({ children, avatar, username, title, postContent }) => {
   return (
     <div className="bg-white p-8 border-b-2 rounded-lg">
       <div className="flex items-center gap-4">
@@ -15,7 +15,8 @@ const Message = ({ children, avatar, username, description }) => {
         <h2>{username || "anon"}</h2>
       </div>
       <div className="pt-4">
-        <p>{description}</p>
+        <p>{title}</p>
+        <div dangerouslySetInnerHTML={{ __html: postContent }} />
       </div>
       {children}
     </div>

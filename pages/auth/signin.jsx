@@ -25,9 +25,9 @@ const SignIn = () => {
   const GoogleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      addRandomUsername();
+      if (!user.displayName) addRandomUsername();
       toast.success("Login successful");
-      router.push("/");
+      router.push("/dashboard");
     } catch (error) {
       toast.error("Login failed");
       console.log(error);
@@ -61,7 +61,7 @@ const SignIn = () => {
       await signInAnonymously(auth);
       addRandomUsername();
       toast.success("Login successful");
-      router.push("/");
+      router.push("/dashboard");
     } catch (error) {
       toast.error("Login failed");
       console.log(error);
@@ -70,7 +70,7 @@ const SignIn = () => {
 
   useEffect(() => {
     if (user) {
-      router.push("/");
+      router.push("/dashboard");
     } else {
       console.log("login");
     }

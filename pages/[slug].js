@@ -3,19 +3,23 @@ import Message from "../components/Message";
 import {useRouter} from "next/router";
 import {auth, db} from "../utils/firebase";
 import {toast} from "react-toastify";
-import {arrayUnion, doc, getDoc, onSnapshot, Timestamp, updateDoc} from "firebase/firestore";
+import {arrayUnion, doc, onSnapshot, Timestamp, updateDoc} from "firebase/firestore";
 import Image from "next/image";
+import {useAuthState} from "react-firebase-hooks/auth";
 
 const PostDetails = () => {
-  const route = useRouter();
-  const routeData = route.query;
   const [comment, setComment] = useState("");
   const [allComments, setAllComments] = useState([]);
+
+  const [user, loading] = useAuthState(auth);
+
+  const route = useRouter();
+  const routeData = route.query;
 
   // Submit a Comment
   const submitComment = async () => {
     // Check if the user is logged in
-    if (!auth.currentUser) return route.push("/auth/signin");
+    if (!user) return route.push("/auth/signin");
 
     if (!comment) {
       toast.error("Don't leave an empty message 😁");
@@ -25,8 +29,8 @@ const PostDetails = () => {
     await updateDoc(docRef, {
       comments: arrayUnion({
         comment,
-        avatar: auth.currentUser.photoURL || "/hacker.png",
-        userName: auth.currentUser.displayName || "anonymous",
+        avatar: user.photoURL || "/hacker.png",
+        userName: user.displayName || "anonymous",
         time: Timestamp.now()
       })
     });

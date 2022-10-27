@@ -11,8 +11,6 @@ const UserInfo = () => {
   const [formValue, setFormValue] = useState("");
   const [isValid, setIsValid] = useState(false);
 
-  console.log(user);
-
   const changeUsername = async e => {
     e.preventDefault();
 
@@ -50,13 +48,13 @@ const UserInfo = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Image
-              src={user?.photoURL}
-              alt={user?.displayName}
+              src={user?.photoURL || "/hacker.png"}
+              alt={user?.displayName || "anon"}
               width={48}
               height={48}
               className="rounded-full"
             />
-            <p>{user?.displayName}</p>
+            <p>{user?.displayName || "anon"}</p>
           </div>
           <p className="flex items-center gap-4">
             <GoCalendar size={24} /> Joined in{" "}
