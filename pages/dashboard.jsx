@@ -14,6 +14,7 @@ import {
 import { FaTrashAlt, FaTimes } from "react-icons/fa";
 import { AiFillEdit } from "react-icons/ai";
 import Link from "next/link";
+import UserInfo from "../components/UserInfo";
 
 const Dashboard = () => {
   const route = useRouter();
@@ -21,10 +22,12 @@ const Dashboard = () => {
   const [posts, setPosts] = useState([]);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
+  console.log(user);
+
   // See if user is logged
   const getData = async () => {
     if (loading) return;
-    if (!user) return route.push("/auth/login");
+    if (!user) return route.push("/auth/signin");
     const collectionRef = collection(db, "posts");
     const q = query(collectionRef, where("user", "==", user.uid));
     const unsubscribe = onSnapshot(q, snapshot => {
@@ -73,31 +76,41 @@ const Dashboard = () => {
 
   return (
     <div>
-      <h1>Your Posts</h1>
-      <div>
-        {posts.map(post => {
-          return (
-            <Message key={post.id} {...post}>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setShowDeletePopup(true)}
-                  className="text-pink-600 flex items-center justify-center gap-2 py-2 text-sm"
-                >
-                  <FaTrashAlt className="text-2xl" /> Delete
-                </button>
+      <UserInfo />
 
-                {showDeletePopup ? <DeletePopup id={post.id} /> : null}
-
-                {/* Redirects user to Post Page with prefilled data (query) */}
-                <Link href={{ pathname: "/post", query: post }}>
-                  <button className="text-teal-600 flex items-center justify-center gap-2 py-2 text-sm">
-                    <AiFillEdit className="text-2xl" /> Edit
+      {/* User Posts */}
+      <div className="mt-16">
+        <h1>
+          Your Posts{" "}
+          <span className="ml-2 circle">
+            {posts.length > 0 ? posts.length : 0}
+          </span>
+        </h1>
+        <div>
+          {posts.map(post => {
+            return (
+              <Message key={post.id} {...post}>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setShowDeletePopup(true)}
+                    className="text-pink-600 flex items-center justify-center gap-2 py-2 text-sm"
+                  >
+                    <FaTrashAlt className="text-2xl" /> Delete
                   </button>
-                </Link>
-              </div>
-            </Message>
-          );
-        })}
+
+                  {showDeletePopup ? <DeletePopup id={post.id} /> : null}
+
+                  {/* Redirects user to Post Page with prefilled data (query) */}
+                  <Link href={{ pathname: "/post", query: post }}>
+                    <button className="text-teal-600 flex items-center justify-center gap-2 py-2 text-sm">
+                      <AiFillEdit className="text-2xl" /> Edit
+                    </button>
+                  </Link>
+                </div>
+              </Message>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ const PostDetails = () => {
   // Submit a Comment
   const submitComment = async () => {
     // Check if the user is logged in
-    if (!auth.currentUser) return route.push("/auth/login");
+    if (!auth.currentUser) return route.push("/auth/signin");
 
     if (!comment) {
       toast.error("Don't leave an empty message 😁");

@@ -13,6 +13,7 @@ import EmailSignIn from "../../components/EmailSignIn";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
+import { addRandomUsername } from "../../utils/helpers";
 
 const SignIn = () => {
   const router = useRouter();
@@ -24,6 +25,7 @@ const SignIn = () => {
   const GoogleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
+      addRandomUsername();
       toast.success("Login successful");
       router.push("/");
     } catch (error) {
@@ -57,6 +59,7 @@ const SignIn = () => {
   const AnonymousLogin = async () => {
     try {
       await signInAnonymously(auth);
+      addRandomUsername();
       toast.success("Login successful");
       router.push("/");
     } catch (error) {
@@ -71,7 +74,7 @@ const SignIn = () => {
     } else {
       console.log("login");
     }
-  });
+  }, [user]);
 
   return (
     <div>

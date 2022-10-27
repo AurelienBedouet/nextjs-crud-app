@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../utils/firebase";
+import { addRandomUsername } from "../utils/helpers";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
 import {
@@ -11,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 const Post = () => {
   // Form State
@@ -50,7 +52,7 @@ const Post = () => {
         timestamp: serverTimestamp(),
         user: user.uid,
         avatar: user.photoURL || "/hacker.png",
-        username: user.displayName || "anonymous",
+        username: user.displayName || "anon",
       });
       setPost({ description: "" });
       toast.success("Post successfully published! 🚀 ");
@@ -61,7 +63,7 @@ const Post = () => {
   // Check our user
   const checkUser = async () => {
     if (loading) return;
-    if (!user) route.push("/auth/login");
+    if (!user) route.push("/auth/signin");
     if (routeData.id) {
       setPost({ description: routeData.description, id: routeData.id });
     }
@@ -79,11 +81,20 @@ const Post = () => {
   };
 
   return (
-    <div className="my-20 p-12 shadow-lg rounded-lg max-w-md mx-auto">
+    <div className="my-20 p-12 shadow-lg rounded-lg">
       <form onSubmit={submitPost}>
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-bold mb-4">
           {post.hasOwnProperty("id") ? "Edit your Post" : "Create a new Post"}
         </h1>
+        <div className="flex items-center gap-6">
+          <p>
+            Your username:{" "}
+            <span className="ml-2 font-medium">{user?.displayName}</span>
+          </p>
+          <Link href="/dashboard">
+            <a className="app__buttons">Change it</a>
+          </Link>
+        </div>
 
         {/* Post Title */}
         {/* <div className="py-2">
