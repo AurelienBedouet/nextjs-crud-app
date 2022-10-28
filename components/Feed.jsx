@@ -8,6 +8,8 @@ const Feed = () => {
   // Create a state with all the posts
   const [allPosts, setAllPosts] = useState([]);
 
+  console.log(allPosts[0]);
+
   const getPosts = async () => {
     const collectionRef = collection(db, "posts");
     const q = query(collectionRef, orderBy("timestamp", "desc"));

@@ -25,7 +25,6 @@ const SignIn = () => {
   const GoogleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      if (!user.displayName) addRandomUsername();
       toast.success("Login successful");
       router.push("/dashboard");
     } catch (error) {
