@@ -22,8 +22,6 @@ const Dashboard = () => {
   const [posts, setPosts] = useState([]);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
-  console.log(user);
-
   // See if user is logged
   const getData = async () => {
     if (loading) return;
@@ -45,7 +43,10 @@ const Dashboard = () => {
   const DeletePopup = ({ id }) => {
     return (
       <>
-        <div className="absolute top-0 right-0 w-screen h-screen bg-gray-500/50 backdrop-blur-sm z-10"></div>
+        <div
+          onClick={() => setShowDeletePopup(false)}
+          className="absolute top-0 right-0 w-screen h-screen bg-gray-500/50 backdrop-blur-sm z-10"
+        ></div>
         <div className="fixed top-[50%] left-[50%] transform translate-y-[-50%] translate-x-[-50%] w-[90%] max-w-sm shadow-xl rounded-xl bg-white p-4 sm:p-8 md:p-12 z-20">
           <h2 className="text-center text-lg font-medium">
             Are you sure you want to delete this Post ?

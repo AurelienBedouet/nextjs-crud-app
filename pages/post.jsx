@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { auth, db, storage } from "../utils/firebase";
+import { featuredImageOptions } from "../utils/data";
+import { validateWebsiteUrl } from "../utils/helpers";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
 import {
@@ -17,6 +19,7 @@ import QuillToolbar, { modules, formats } from "../components/EditorToolbar";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { v4 } from "uuid";
+import TabContent from "../components/TabComponent/TabContent";
 
 const Post = () => {
   // Form State
@@ -25,40 +28,79 @@ const Post = () => {
     postContent: "",
   });
 
-  const [imageUpload, setImageUpload] = useState(null);
-  const [imageUrl, setImageUrl] = useState("");
+  const [featuredImage, setFeaturedImage] = useState(null);
+  const [featuredImageUrl, setFeaturedImageUrl] = useState("");
+
+  const [linkImage, setLinkImage] = useState({
+    websiteUrl: "",
+    isValid: false,
+  });
+
+  const [showImgSelectionOptions, setShowImgSelectionOptions] = useState(false);
+
+  const [disabled, setDisabled] = useState(false);
 
   const [user, loading] = useAuthState(auth);
-  const [disabled, setDisabled] = useState(false);
   const route = useRouter();
   const routeData = route.query;
 
+  // Tab
+  const [currentTab, setCurrentTab] = useState("1");
+  const handleTabClick = e => {
+    e.preventDefault();
+    setCurrentTab(e.target.id);
+  };
+
+  const onUploadImage = e => {
+    setFeaturedImage(e.target.files[0]);
+    setShowImgSelectionOptions(false);
+  };
+
   const onPostContentChange = value => {
     setPost({ ...post, postContent: value });
+  };
+
+  // Link Image Solution
+  const onChangeLinkImage = e => {
+    const { value } = e.target;
+    const isValid = !value || validateWebsiteUrl(value);
+
+    setLinkImage({
+      websiteUrl: value,
+      isValid,
+    });
+  };
+
+  const submitLinkImage = () => {
+    setFeaturedImageUrl(linkImage.websiteUrl);
+    setShowImgSelectionOptions(false);
   };
 
   // Submit Post
   const submitPost = async e => {
     e.preventDefault();
 
-    // Upload Image
-    if (imageUpload == null) {
-      toast.error("No featured Image selected 😢 ");
+    // Featured Image
+    if (!featuredImageUrl) {
+      toast.error("No featured image selected 😢");
       disableButton();
       return;
     }
 
-    const imageID = v4();
-    const imageRef = ref(
-      storage,
-      `images/featuredImages/${imageUpload.name + imageID}`
-    );
+    // Upload solution
+    if (!featuredImageUrl) {
+      const imageID = v4();
+      const imageRef = ref(
+        storage,
+        `images/featuredImages/${featuredImage.name + imageID}`
+      );
 
-    uploadBytes(imageRef, imageUpload).then(snapshot => {
-      getDownloadURL(snapshot.ref).then(url => setImageUrl(url));
-    });
+      uploadBytes(imageRef, featuredImage).then(snapshot => {
+        getDownloadURL(snapshot.ref).then(url => setFeaturedImageUrl(url));
+      });
+    }
 
-    // Run Checks
+    // Title and Post Content - Run Checks
     if (!post.title) {
       toast.error("A title is required 😅");
       disableButton();
@@ -83,6 +125,7 @@ const Post = () => {
       return;
     }
 
+    // Update post
     if (post?.hasOwnProperty("id")) {
       const docRef = doc(db, "posts", post.id);
       const updatedPost = {
@@ -96,7 +139,7 @@ const Post = () => {
       const collectionRef = collection(db, "posts");
       await addDoc(collectionRef, {
         ...post,
-        featuredImage: imageUrl,
+        featuredImage: featuredImageUrl,
         timestamp: serverTimestamp(),
         user: user.uid,
         avatar: user.photoURL || "/hacker.png",
@@ -173,24 +216,100 @@ const Post = () => {
         </div>
 
         {/* Post Featured Image */}
-        <div className="py-4">
-          <div className="flex items-center gap-4">
-            <h3 className="text-lg font-medium">Featured Image</h3>
-            <label for="imageUpload" className="app__buttons cursor-pointer">
-              Upload
-            </label>
-            <input
-              onChange={e => setImageUpload(e.target.files[0])}
-              type="file"
-              id="imageUpload"
-              accept="image/png, image/jpeg"
-              className="hidden"
-            />
-          </div>
-          {!imageUpload ? (
-            <p className="text-red-500 my-2">No images selected yet.</p>
+        <div className="flex items-center gap-6">
+          <h3 className="text-lg font-medium">Featured Image</h3>
+
+          {/* Open Modal Featured Image Selection Options */}
+          <button
+            onClick={() => setShowImgSelectionOptions(true)}
+            className="app__buttons"
+            type="button"
+          >
+            Select
+          </button>
+
+          {/* Modal Featured Image Selection Options */}
+          {showImgSelectionOptions ? (
+            <>
+              <div
+                onClick={() => setShowImgSelectionOptions(false)}
+                className="absolute top-0 right-0 w-screen h-screen backdrop-blur-sm z-10"
+              />
+
+              {/* Tabs */}
+              <div className="fixed top-[50%] left-[50%] transform translate-y-[-50%] translate-x-[-50%] w-[90%] max-w-5xl shadow-xl rounded-xl bg-white p-4 sm:p-8 md:p-12 z-20">
+                <div className="flex justify-between">
+                  {featuredImageOptions.map(tab => (
+                    <button
+                      className="text-base font-medium border border-gray-500 cursor-pointer p-2 w-full transition ease-out duration-500 hover:text-white hover:bg-cyan-500 disabled:text-white disabled:bg-gray-500 disabled:cursor-default"
+                      key={tab.id}
+                      id={tab.id}
+                      disabled={currentTab === `${tab.id}`}
+                      onClick={handleTabClick}
+                    >
+                      {tab.title}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tabs Content */}
+                <div>
+                  <TabContent id="1" currentTab={currentTab}>
+                    <div className="pt-10 flex flex-col items-center gap-6">
+                      <label
+                        htmlFor="imageUpload"
+                        className="app__buttons cursor-pointer text-center w-[80%]"
+                      >
+                        Upload Image
+                      </label>
+                      <input
+                        onChange={onUploadImage}
+                        type="file"
+                        id="imageUpload"
+                        accept="image/png, image/jpeg"
+                        className="hidden"
+                      />
+                      <p>Accepted format: PNG or JPEG</p>
+                    </div>
+                  </TabContent>
+                  <TabContent id="2" currentTab={currentTab}>
+                    <div className="pt-10 flex flex-col items-center gap-6">
+                      <input
+                        type="text"
+                        value={linkImage.websiteUrl}
+                        name={linkImage.websiteUrl}
+                        onChange={onChangeLinkImage}
+                        placeholder="https://my-image.com"
+                        className="w-[80%] border-2 rounded-lg py-1 px-2"
+                      />
+                      {!linkImage.isValid &&
+                        linkImage.websiteUrl.length > 0 && (
+                          <div className="text-red-600">URL is invalid</div>
+                        )}
+                      <button
+                        onClick={submitLinkImage}
+                        disabled={!linkImage.isValid}
+                        className={`app__buttons w-[80%] ${
+                          !linkImage.isValid
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </TabContent>
+                  <TabContent id="3" currentTab={currentTab}>
+                    <h3>goodbye</h3>
+                  </TabContent>
+                </div>
+              </div>
+            </>
+          ) : null}
+          {!featuredImageUrl ? (
+            <p className="text-red-500">No images selected yet.</p>
           ) : (
-            <p className="text-green-500 mt-4">Image successfully selected.</p>
+            <p className="text-green-500">Image successfully selected.</p>
           )}
         </div>
 
