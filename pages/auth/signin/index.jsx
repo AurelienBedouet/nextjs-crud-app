@@ -6,14 +6,14 @@ import {
   GoogleAuthProvider,
   signInAnonymously,
 } from "firebase/auth";
-import { auth } from "../../utils/firebase";
+import { auth } from "../../../utils/firebase";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
-import EmailSignIn from "../../components/EmailSignIn";
+import EmailSignIn from "./EmailSignIn";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
-import { addRandomUsername } from "../../utils/helpers";
+import { addRandomUsername } from "../../../utils/helpers";
 
 const SignIn = () => {
   const router = useRouter();

@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
-import Message from "../components/Message";
+import Message from "../../components/Message";
 import {useRouter} from "next/router";
-import {auth, db} from "../utils/firebase";
+import {auth, db} from "../../utils/firebase";
 import {toast} from "react-toastify";
 import {arrayUnion, doc, onSnapshot, Timestamp, updateDoc} from "firebase/firestore";
 import Image from "next/image";
@@ -55,6 +55,7 @@ const PostDetails = () => {
   return (
     <div>
       <Message {...routeData}></Message>
+      {/* Comments */}
       <div className="my-4">
         <div className="flex">
           <input

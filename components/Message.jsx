@@ -1,12 +1,15 @@
 import React from "react";
 import Image from "next/image";
+import moment from "moment/moment";
 
 const Message = ({
   children,
   avatar,
+  createdAt,
+  updatedAt,
   username,
   title,
-  featuredImage,
+  featuredImageUrl,
   postContent,
 }) => {
   return (
@@ -21,13 +24,8 @@ const Message = ({
         />
         <h2>{username || "anon"}</h2>
       </div>
-      {featuredImage ? (
-        <Image
-          src={featuredImage}
-          alt={`${title}'s featured image'`}
-          width={500}
-          height={333}
-        />
+      {featuredImageUrl ? (
+        <Image src={featuredImageUrl} alt={title} width={500} height={333} />
       ) : null}
       <div className="pt-4">
         <p>{title}</p>

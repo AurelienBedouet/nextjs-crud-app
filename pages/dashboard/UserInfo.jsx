@@ -3,13 +3,20 @@ import { GoCalendar } from "react-icons/go";
 import Image from "next/image";
 import moment from "moment/moment";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../utils/firebase";
+import { auth } from "../../utils/firebase";
 import { updateProfile } from "firebase/auth";
 
 const UserInfo = () => {
   const [user, loading] = useAuthState(auth);
   const [formValue, setFormValue] = useState("");
   const [isValid, setIsValid] = useState(false);
+
+  let usernameMessage = "";
+  if (!isValid && formValue.length > 3) {
+    usernameMessage = "Incorrect Format.";
+  } else if (formValue.length < 4) {
+    usernameMessage = "Username must be 4 characters minimum.";
+  } else usernameMessage = "Correct Format.";
 
   const changeUsername = async e => {
     e.preventDefault();
@@ -84,12 +91,16 @@ const UserInfo = () => {
               </div>
             </form>
           </div>
-          {isValid ? (
-            <p className="text-green-500">Correct Format</p>
-          ) : (
-            <p className="text-red-500">Incorrect Format</p>
-          )}
+          <p className={`pt-4 ${isValid ? "text-green-500" : "text-red-500"}`}>
+            {usernameMessage}
+          </p>
         </div>
+      </div>
+
+      {/* User Bio */}
+      <div className="rounded-lg shadow-xl p-6">
+        <h3>Bio</h3>
+        <p></p>
       </div>
     </div>
   );

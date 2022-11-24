@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { auth, db, storage } from "../utils/firebase";
-import { featuredImageOptions } from "../utils/data";
-import { validateWebsiteUrl } from "../utils/helpers";
+import { auth, db, storage } from "../../utils/firebase";
+import { featuredImageOptions } from "../../utils/data";
+import { validateWebsiteUrl } from "../../utils/helpers";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
 import {
@@ -15,21 +15,23 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
-import QuillToolbar, { modules, formats } from "../components/EditorToolbar";
+import QuillToolbar, { modules, formats } from "../../components/EditorToolbar";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { v4 } from "uuid";
-import TabContent from "../components/TabComponent/TabContent";
+import TabContent from "../../components/TabComponent/TabContent";
+import UnsplashImages from "../../components/unsplashImages";
+import Image from "next/image";
 
 const Post = () => {
   // Form State
   const [post, setPost] = useState({
     title: "",
     postContent: "",
+    featuredImageUrl: "",
   });
 
-  const [featuredImage, setFeaturedImage] = useState(null);
-  const [featuredImageUrl, setFeaturedImageUrl] = useState("");
+  const [uploadImage, setUploadImage] = useState("");
 
   const [linkImage, setLinkImage] = useState({
     websiteUrl: "",
@@ -41,6 +43,7 @@ const Post = () => {
   const [disabled, setDisabled] = useState(false);
 
   const [user, loading] = useAuthState(auth);
+
   const route = useRouter();
   const routeData = route.query;
 
@@ -51,14 +54,36 @@ const Post = () => {
     setCurrentTab(e.target.id);
   };
 
-  const onUploadImage = e => {
-    setFeaturedImage(e.target.files[0]);
-    setShowImgSelectionOptions(false);
-  };
-
   const onPostContentChange = value => {
     setPost({ ...post, postContent: value });
   };
+
+  // Upload Image solution
+  const onUploadImage = e => {
+    setUploadImage(e.target.files[0]);
+    setShowImgSelectionOptions(false);
+  };
+
+  const submitUploadImage = () => {
+    if (!uploadImage) return;
+    else {
+      const imageID = v4();
+      const imageRef = ref(
+        storage,
+        `images/featuredImages/${uploadImage.name + imageID}`
+      );
+
+      uploadBytes(imageRef, uploadImage).then(snapshot => {
+        getDownloadURL(snapshot.ref).then(url =>
+          setPost({ ...post, featuredImageUrl: url })
+        );
+      });
+    }
+  };
+
+  useEffect(() => {
+    submitUploadImage();
+  }, [uploadImage]);
 
   // Link Image Solution
   const onChangeLinkImage = e => {
@@ -72,7 +97,9 @@ const Post = () => {
   };
 
   const submitLinkImage = () => {
-    setFeaturedImageUrl(linkImage.websiteUrl);
+    if (!linkImage.websiteUrl) return;
+
+    setPost({ ...post, featuredImageUrl: linkImage.websiteUrl });
     setShowImgSelectionOptions(false);
   };
 
@@ -81,23 +108,10 @@ const Post = () => {
     e.preventDefault();
 
     // Featured Image
-    if (!featuredImageUrl) {
+    if (!post.featuredImageUrl) {
       toast.error("No featured image selected 😢");
       disableButton();
       return;
-    }
-
-    // Upload solution
-    if (!featuredImageUrl) {
-      const imageID = v4();
-      const imageRef = ref(
-        storage,
-        `images/featuredImages/${featuredImage.name + imageID}`
-      );
-
-      uploadBytes(imageRef, featuredImage).then(snapshot => {
-        getDownloadURL(snapshot.ref).then(url => setFeaturedImageUrl(url));
-      });
     }
 
     // Title and Post Content - Run Checks
@@ -130,7 +144,7 @@ const Post = () => {
       const docRef = doc(db, "posts", post.id);
       const updatedPost = {
         ...post,
-        timestamp: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
       await updateDoc(docRef, updatedPost);
       return route.push("/");
@@ -139,8 +153,7 @@ const Post = () => {
       const collectionRef = collection(db, "posts");
       await addDoc(collectionRef, {
         ...post,
-        featuredImage: featuredImageUrl,
-        timestamp: serverTimestamp(),
+        createdAt: serverTimestamp(),
         user: user.uid,
         avatar: user.photoURL || "/hacker.png",
         username: user.displayName || "anon",
@@ -159,7 +172,7 @@ const Post = () => {
       setPost({
         title: routeData.title,
         postContent: routeData.postContent,
-        featuredImage: routeData.featuredImage,
+        featuredImageUrl: routeData.featuredImageUrl,
         id: routeData.id,
       });
     }
@@ -236,8 +249,9 @@ const Post = () => {
                 className="absolute top-0 right-0 w-screen h-screen backdrop-blur-sm z-10"
               />
 
-              {/* Tabs */}
-              <div className="fixed top-[50%] left-[50%] transform translate-y-[-50%] translate-x-[-50%] w-[90%] max-w-5xl shadow-xl rounded-xl bg-white p-4 sm:p-8 md:p-12 z-20">
+              {/* Tab Component */}
+              <div className="fixed top-[50%] left-[50%] transform translate-y-[-50%] translate-x-[-50%] w-[90%] max-w-3xl max-h-fit shadow-xl rounded-xl bg-white p-4 sm:p-8 md:p-12 z-20">
+                {/* Tabs Buttons */}
                 <div className="flex justify-between">
                   {featuredImageOptions.map(tab => (
                     <button
@@ -263,8 +277,8 @@ const Post = () => {
                         Upload Image
                       </label>
                       <input
-                        onChange={onUploadImage}
                         type="file"
+                        onChange={onUploadImage}
                         id="imageUpload"
                         accept="image/png, image/jpeg"
                         className="hidden"
@@ -300,16 +314,26 @@ const Post = () => {
                     </div>
                   </TabContent>
                   <TabContent id="3" currentTab={currentTab}>
-                    <h3>goodbye</h3>
+                    <UnsplashImages
+                      post={post}
+                      setPost={setPost}
+                      setShowImgSelectionOptions={setShowImgSelectionOptions}
+                    />
                   </TabContent>
                 </div>
               </div>
             </>
           ) : null}
-          {!featuredImageUrl ? (
+          {!post.featuredImageUrl ? (
             <p className="text-red-500">No images selected yet.</p>
           ) : (
-            <p className="text-green-500">Image successfully selected.</p>
+            <Image
+              src={post.featuredImageUrl}
+              alt="image"
+              width={100}
+              height={66}
+              className="rounded-lg"
+            />
           )}
         </div>
 

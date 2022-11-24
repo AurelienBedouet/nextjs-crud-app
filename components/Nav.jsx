@@ -18,7 +18,7 @@ const Nav = () => {
   };
 
   return (
-    <nav className="flex justify-between items-center py-6">
+    <nav className="w-[95%] mx-auto xl:max-w-[1280px] 2xl:w-full flex justify-between items-center py-3">
       <Link href="/">
         <a className="text-xl font-bold tracking-widest text-gray-600">
           Creative Minds

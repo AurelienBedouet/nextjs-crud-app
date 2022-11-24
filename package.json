@@ -19,6 +19,7 @@
     "react-quill": "^2.0.0",
     "react-toastify": "^9.0.8",
     "unique-names-generator": "^4.7.1",
+    "unsplash-js": "^7.0.15",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

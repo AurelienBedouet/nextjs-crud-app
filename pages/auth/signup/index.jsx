@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { AiFillLock, AiOutlineMail } from "react-icons/ai";
-import { auth } from "../../utils/firebase";
+import { auth } from "../../../utils/firebase";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { addRandomUsername } from "../../../utils/helpers";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -20,6 +21,7 @@ const Signup = () => {
     setError("");
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      addRandomUsername();
       toast.success("Account created with success!");
       router.push("/");
     } catch (e) {

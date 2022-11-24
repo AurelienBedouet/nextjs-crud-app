@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { AiFillLock, AiOutlineMail } from "react-icons/ai";
-import { auth } from "../utils/firebase";
+import { auth } from "../../../utils/firebase";
 import { useRouter } from "next/router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { toast } from "react-toastify";

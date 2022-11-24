@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Message from "../components/Message";
-import { auth, db } from "../utils/firebase";
+import { auth, db } from "../../utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
 import {
@@ -14,7 +13,9 @@ import {
 import { FaTrashAlt, FaTimes } from "react-icons/fa";
 import { AiFillEdit } from "react-icons/ai";
 import Link from "next/link";
-import UserInfo from "../components/UserInfo";
+import UserInfo from "./UserInfo";
+import Image from "next/image";
+import moment from "moment/moment";
 
 const Dashboard = () => {
   const route = useRouter();
@@ -54,13 +55,13 @@ const Dashboard = () => {
           <div className="flex items-center justify-around mt-8">
             <button
               onClick={() => deletePost(id)}
-              className="text-pink-600 flex items-center justify-center gap-2 py-2 text-sm"
+              className="text-pink-600 flex items-center justify-center gap-2 py-2 text-sm hover:opacity-80"
             >
               <FaTrashAlt className="text-2xl" /> Delete
             </button>
             <button
               onClick={() => setShowDeletePopup(false)}
-              className="flex items-center justify-center gap-2 py-2 text-sm"
+              className="flex items-center justify-center gap-2 py-2 text-sm hover:opacity-80"
             >
               <FaTimes className="text-2xl" /> Close
             </button>
@@ -89,9 +90,36 @@ const Dashboard = () => {
         </h1>
         <div>
           {posts.map(post => {
+            const { id, createdAt, updatedAt, title, featuredImageUrl } = post;
             return (
-              <Message key={post.id} {...post}>
-                <div className="flex gap-4">
+              <article key={id} {...post} className="py-8">
+                <div>
+                  <h2>{title}</h2>
+                  <p>
+                    Last update:{" "}
+                    {moment(updatedAt?.seconds * 1000).format("DD MMM YYYY") ||
+                      moment(createdAt.seconds * 1000).format("DD MMM YYYY")}
+                  </p>
+                  {featuredImageUrl ? (
+                    <Image
+                      src={featuredImageUrl}
+                      alt={title}
+                      width={500}
+                      height={333}
+                    />
+                  ) : null}
+                </div>
+                <div className="flex gap-8">
+                  <Link href={{ pathname: `/${id}`, query: { ...post } }}>
+                    <button className="app__buttons">See Post</button>
+                  </Link>
+                  {/* Redirects user to Post Page with prefilled data (query) */}
+                  <Link href={{ pathname: "/post", query: post }}>
+                    <button className="text-teal-600 flex items-center justify-center gap-2 py-2 text-sm">
+                      <AiFillEdit className="text-2xl" /> Edit
+                    </button>
+                  </Link>
+
                   <button
                     onClick={() => setShowDeletePopup(true)}
                     className="text-pink-600 flex items-center justify-center gap-2 py-2 text-sm"
@@ -99,16 +127,9 @@ const Dashboard = () => {
                     <FaTrashAlt className="text-2xl" /> Delete
                   </button>
 
-                  {showDeletePopup ? <DeletePopup id={post.id} /> : null}
-
-                  {/* Redirects user to Post Page with prefilled data (query) */}
-                  <Link href={{ pathname: "/post", query: post }}>
-                    <button className="text-teal-600 flex items-center justify-center gap-2 py-2 text-sm">
-                      <AiFillEdit className="text-2xl" /> Edit
-                    </button>
-                  </Link>
+                  {showDeletePopup ? <DeletePopup id={id} /> : null}
                 </div>
-              </Message>
+              </article>
             );
           })}
         </div>
